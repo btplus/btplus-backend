@@ -82,6 +82,13 @@ app.get('/usuarios', function (req, res) {
     })
 });
 
+app.post('/usuarios', function (req, res) {
+    let request = connFactory.insert(req, paramsCloudant, req.body)
+    request.then(function (result) {
+        res.json(result);
+    });
+});
+
 
 var port = process.env.PORT || 3001
 app.listen(port, function () {
