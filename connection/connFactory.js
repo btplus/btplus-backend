@@ -3,20 +3,16 @@ let Promise = require('bluebird');
 
 var insert = function (req, params, ddoc) {
     return new Promise(function (resolve, reject) {
-        if (req.user != undefined) {
-            let conn = initConn(params);
-            Promise.promisifyAll(conn);
+        let conn = initConn(params);
+        Promise.promisifyAll(conn);
 
-            conn.then(function (cloudantConnection) {
-                let cloudantDb = cloudantConnection;
+        conn.then(function (cloudantConnection) {
+            let cloudantDb = cloudantConnection;
 
-                let author = req.user.id;
-                ddoc.author = author;
-                insertDocument(cloudantDb, ddoc, resultInsert => {
-                    resolve(resultInsert)
-                });
+            insertDocument(cloudantDb, ddoc, resultInsert => {
+                resolve(resultInsert)
             });
-        }
+        });
     });
 }
 

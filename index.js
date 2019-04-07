@@ -89,6 +89,13 @@ app.post('/usuarios', function (req, res) {
     });
 });
 
+app.post('/compromissos', function (req, res) {
+    let request = connFactory.insert(req, paramsCloudant, req.body)
+    request.then(function (result) {
+        res.json(result);
+    });
+});
+
 
 var port = process.env.PORT || 3001
 app.listen(port, function () {
@@ -143,7 +150,7 @@ app.post('/conversation/', (req, res) => {
                         realizado: false
                     }
                 };
-            
+
                 let request = connFactory.getDocument(paramsCloudant, query)
                 request.then(function (result) {
 
