@@ -6,14 +6,82 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+var connFactory = require("./connection/connFactory.js");
+
 var cors = require('cors');
 app.use(cors())
 
 let Promise = require('bluebird');
 
+let paramsCloudant = {
+    "username": "96ba32ad-e17d-494f-a93e-72240b1e0b16-bluemix",
+    "host": "96ba32ad-e17d-494f-a93e-72240b1e0b16-bluemix.cloudant.com",
+    "dbname": "btplus",
+    "password": "e373c010bcb53c3ea89a59f7fa2642789e7bfe3128bab1c3e2762b713ab04641"
+};
+
 app.get('/', function (req, res) {
     res.send("response");
 });
+
+// GET
+// https://btplus.mybluemix.net/compromissos
+// https://btplus.mybluemix.net/agenda/{idUsuario}
+// https://btplus.mybluemix.net/usuarios
+
+
+app.get('/compromissos', function (req, res) {
+    let query = {
+        selector: {
+            tipo: "COMPROMISSO"
+        }
+    };
+
+    let request = connFactory.getDocument(paramsCloudant, query)
+    request.then(function (result) {
+        if (result[0] != undefined) {
+            res.send(result);
+        } else {
+            res.send({});
+        }
+    })
+});
+
+app.get('/agenda/:id', function (req, res) {
+    let query = {
+        selector: {
+            tipo: "AGENDA",
+            idUsuario: (req.params.id)
+        }
+    };
+
+    let request = connFactory.getDocument(paramsCloudant, query)
+    request.then(function (result) {
+        if (result[0] != undefined) {
+            res.send(result);
+        } else {
+            res.send({});
+        }
+    })
+});
+
+app.get('/usuarios', function (req, res) {
+    let query = {
+        selector: {
+            tipo: "USUARIO",
+        }
+    };
+
+    let request = connFactory.getDocument(paramsCloudant, query)
+    request.then(function (result) {
+        if (result[0] != undefined) {
+            res.send(result);
+        } else {
+            res.send({});
+        }
+    })
+});
+
 
 var port = process.env.PORT || 3001
 app.listen(port, function () {
@@ -61,11 +129,31 @@ app.post('/conversation/', (req, res) => {
                 output: response.output.text[0]
             }
 
+            if(resp.text == "function:CONSULTA_PENDENCIAS") {
+                let query = {
+                    selector: {
+                        tipo: "COMPROMISSO",
+                        realizado: false
+                    }
+                };
+            
+                let request = connFactory.getDocument(paramsCloudant, query)
+                request.then(function (result) {
 
+                    resp.compromissos = result;
+                    resp.output = "Veja suas pendências!";
 
+                    if (result[0] != undefined) {
+                        res.json(resp);
+                    } else {
+                        res.send({});
+                    }
+                })
 
+            } else {
+                res.json(resp);
+            }
 
-            res.json(resp);
         }
     });
 });
